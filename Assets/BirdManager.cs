@@ -10,7 +10,7 @@ public class BirdManager : MonoBehaviour {
     private static float r2 = 0.8f;
     private static float r3 = 0.1f;
     private static int CENTER_PULL_FACTOR = 600;
-    private static int DIST_THRESHOLD = 2;
+    private static int DIST_THRESHOLD = 1;
 
     private static float SPEED = 0.2f;
 
@@ -56,9 +56,22 @@ public class BirdManager : MonoBehaviour {
 
     public void Rotate(Vector3 targetPosition)
     {
-        var pos = Camera.main.WorldToScreenPoint(transform.localPosition);
-        var rotation = Quaternion.LookRotation(Vector3.forward, Input.mousePosition - pos);
+        //var pos = Camera.main.WorldToScreenPoint(transform.localPosition);
+        //var rotation = Quaternion.LookRotation(Vector3.forward, Input.mousePosition - pos);
         //transform.localRotation = rotation;
+
+        var vec = (learderBird.transform.position - this.transform.position).normalized;
+        var angle = (Mathf.Atan2(vec.y, vec.x) * Mathf.Rad2Deg);
+        if(vec.x > 0)
+        {
+            this.transform.rotation = Quaternion.Euler(0.0f, 0.0f, angle);
+        }
+        else
+        {
+            angle -= 180.0f;
+            this.transform.rotation = Quaternion.Euler(0.0f, 180.0f, angle);
+        }
+        
     }
 
     void Move()
