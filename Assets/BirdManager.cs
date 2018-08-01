@@ -4,12 +4,13 @@ using UnityEngine;
 
 public class BirdManager : MonoBehaviour {
 
-    public static float r1 = 1;
-    public static float r2 = 0.8f;
-    public static float r3 = 0.1f;
+    private static Vector2 center = Vector2.zero;
 
-    public static int CENTER_PULL_FACTOR = 300;
-    public static int DIST_THRESHOLD = 1;
+    private static float r1 = 1;
+    private static float r2 = 0.8f;
+    private static float r3 = 0.1f;
+    private static int CENTER_PULL_FACTOR = 600;
+    private static int DIST_THRESHOLD = 2;
 
     private static float SPEED = 0.2f;
 
@@ -20,9 +21,24 @@ public class BirdManager : MonoBehaviour {
     private Vector2 v2 = Vector2.zero;
     private Vector2 v3 = Vector2.zero;
 
+    public bool isMouseUsed = false;
+    private GameObject learderBird;
+
+    private Vector3 topLeft;
+    private Vector3 bottomRight;
     void Start () {
-		
-	}
+        topLeft = Camera.main.ScreenToWorldPoint(Vector3.zero);
+        topLeft.Scale(new Vector3(1, -1, 1));
+        bottomRight = Camera.main.ScreenToWorldPoint(new Vector3(Screen.width, Screen.height, 0));
+        bottomRight.Scale(new Vector3(1, -1, 1));
+
+        learderBird = GameObject.Find("Player");
+    }
+
+    public static void SetCenter(Vector2 newCenter)
+    {
+        center = newCenter;
+    }
 	
 	// Update is called once per frame
 	void Update () {
@@ -38,12 +54,11 @@ public class BirdManager : MonoBehaviour {
         return vy;
     }
 
-    public void Rotate(Vector3 averageVelocity)
+    public void Rotate(Vector3 targetPosition)
     {
-        this.transform.LookAt(averageVelocity);
-        //this.transform.rotation = Quaternion.Slerp(this.transform.rotation,
-        //             Quaternion.LookRotation(averageVelocity.normalized),
-        //             Time.deltaTime * 3f);
+        var pos = Camera.main.WorldToScreenPoint(transform.localPosition);
+        var rotation = Quaternion.LookRotation(Vector3.forward, Input.mousePosition - pos);
+        //transform.localRotation = rotation;
     }
 
     void Move()
@@ -63,25 +78,26 @@ public class BirdManager : MonoBehaviour {
 
         float x = transform.position.x;
         float y = transform.position.y;
-        /*if (x <= -12f)
+        
+        /*if (x <= topLeft.x)
         {
-            this.transform.position = new Vector2(-12f, y);
+            this.transform.position = new Vector2(topLeft.x, y);
             vx *= -1;
         }
-        if (x >= 12f)
+        if (x >= bottomRight.x)
         {
-            this.transform.position = new Vector2(12f, y);
+            this.transform.position = new Vector2(bottomRight.x, y);
             vx *= -1;
         }
 
-        if (y <= -6f)
+        if (y <= topLeft.y)
         {
-            this.transform.position = new Vector2(x, -6f);
+            this.transform.position = new Vector2(x, topLeft.y);
             vy *= -1;
         }
-        if (y >= 6f)
+        if (y >= bottomRight.y)
         {
-            this.transform.position = new Vector2(x, 6f);
+            this.transform.position = new Vector2(x, bottomRight.y);
             vy *= -1;
         }*/
     }
@@ -107,22 +123,32 @@ public class BirdManager : MonoBehaviour {
     
     void Rule1()
     {
-        for (int i = 0; i < GameManager.N; i++)
+        if (isMouseUsed)
         {
-            GameObject otherBall = GameManager.birds[i];
-            if (this != otherBall.GetComponent<BirdManager>())
-            {
-                v1.x += otherBall.transform.position.x;
-                v1.y += otherBall.transform.position.y;
-            }
+            center = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+            v1.x = (center.x - this.transform.position.x) / CENTER_PULL_FACTOR;
+            v1.y = (center.y - this.transform.position.y) / CENTER_PULL_FACTOR;
         }
+        else
+        {
+            for (int i = 0; i < GameManager.N; i++)
+            {
+                GameObject otherBall = GameManager.birds[i];
+                if (this != otherBall.GetComponent<BirdManager>())
+                {
+                    v1.x += otherBall.transform.position.x;
+                    v1.y += otherBall.transform.position.y;
+                }
+            }
 
-        v1.x /= (GameManager.N - 1);
-        v1.y /= (GameManager.N - 1);
+            v1.x /= (GameManager.N - 1);
+            v1.y /= (GameManager.N - 1);
 
-        v1.x = (v1.x - this.transform.position.x) / CENTER_PULL_FACTOR;
-        v1.y = (v1.y - this.transform.position.y) / CENTER_PULL_FACTOR;
-
+            //v1.x = (v1.x - this.transform.position.x) / CENTER_PULL_FACTOR;
+            //v1.y = (v1.y - this.transform.position.y) / CENTER_PULL_FACTOR;
+            v1.x = (learderBird.transform.position.x - this.transform.position.x) / CENTER_PULL_FACTOR;
+            v1.y = (learderBird.transform.position.y - this.transform.position.y) / CENTER_PULL_FACTOR;
+        }
     }
 
     void Rule2()

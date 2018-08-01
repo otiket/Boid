@@ -5,7 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour {
 
     public GameObject originalObject;
-    public static int N = 10;
+    public static int N = 50;
     public static GameObject[] birds = new GameObject[N];
 
     GameObject cam;
@@ -17,8 +17,6 @@ public class GameManager : MonoBehaviour {
             float y = Random.Range(0.0f, 3f);
             birds[i] = Instantiate(originalObject, new Vector2(x, y), Quaternion.identity);
         }
-        cam = Camera.main.gameObject;
-        cam.GetComponent<CameraManager>().bird = birds[0];
 	}
 	
 	// Update is called once per frame
@@ -35,7 +33,12 @@ public class GameManager : MonoBehaviour {
         averageVy /= N;
         foreach (GameObject bird in birds)
         {
-            //bird.GetComponent<BirdManager>().Rotate(GetCenter());
+            bird.GetComponent<BirdManager>().Rotate(GetCenter());
+        }
+
+        if (Input.GetMouseButtonDown(0))
+        {
+            BirdManager.SetCenter(Camera.main.ScreenToWorldPoint(Input.mousePosition));
         }
 	}
 

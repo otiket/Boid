@@ -285,6 +285,7 @@
     <Compile Include="Assets\BirdManager.cs" />
     <Compile Include="Assets\CameraManager.cs" />
     <Compile Include="Assets\GameManager.cs" />
+    <Compile Include="Assets\PlayerManager.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="GenerateTargetFrameworkMonikerAttribute" />
